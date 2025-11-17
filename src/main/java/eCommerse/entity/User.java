@@ -1,11 +1,6 @@
 package eCommerse.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -43,5 +38,8 @@ public class User {
 	@NotBlank
 	@Size(min = 8, message = "Password must be at least 8 characters long")
 	private String password;
+
+    @OneToMany
+    private Order order;
 
 }
