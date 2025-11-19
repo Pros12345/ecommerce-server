@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import eCommerse.entity.User;
-import eCommerse.repository.impl.UserRepository;
+import eCommerse.repository.UserRepository;
 
 @RestController
 @RequestMapping("/api/auth")

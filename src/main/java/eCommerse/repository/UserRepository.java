@@ -1,4 +1,4 @@
-package eCommerse.repository.impl;
+package eCommerse.repository;
 
 import java.util.Optional;
 

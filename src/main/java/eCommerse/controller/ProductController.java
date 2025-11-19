@@ -1,44 +1,31 @@
-//package eCommerse.controller;
-//
-//import eCommerse.entity.Product;
-//import eCommerse.service.impl.ProductsServiceImpl;
-//import org.springframework.web.bind.annotation.*;
-//import java.util.List;
-//
-//@RestController
-//@RequestMapping("/products")
-//public class ProductController {
-//
-//    private final ProductsServiceImpl service;
-//
-//    public ProductController(ProductsServiceImpl service) {
-//        this.service = service;
-//    }
-//
-//    @PostMapping
-//    public Product create(@RequestBody Product product) {
-//        return service.createProduct(product);
-//    }
-//
-//    @GetMapping("/getProducts/{id}")
-//    public Product getOne(@PathVariable int id) {
-//        return service.getProductById(id);
-//    }
-//
-//    @GetMapping("/getProducts")
-//    public List<Product> getAll() {
-//        return service.getAllProducts();
-//    }
-//
-//    @PutMapping("/updateProducts/{id}")
-//    public Product update(@PathVariable int id, @RequestBody Product product) {
-//        return service.updateProduct(id, product);
-//    }
-//
-//    @DeleteMapping("/delete/{id}")
-//    public String delete(@PathVariable int id) {
-//        service.deleteProduct(id);
-//        return "Product deleted successfully";
-//    }
-//}
-//
+package eCommerse.controller;
+
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import eCommerse.entity.Product;
+import eCommerse.request.GetProductsReqDTO;
+import eCommerse.service.ProductsService;
+
+@RestController
+public class ProductController {
+
+	@Autowired
+	ProductsService productsService;
+
+	@PostMapping(value = "/products", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+	public ResponseEntity<Product> addProduct(@RequestPart("product") GetProductsReqDTO getProductsReqDTO,
+			@RequestPart("image") MultipartFile imageFile) throws IOException {
+
+		Product savedProduct = productsService.saveProduct(getProductsReqDTO, imageFile);
+		return ResponseEntity.ok(savedProduct);
+	}
+}
