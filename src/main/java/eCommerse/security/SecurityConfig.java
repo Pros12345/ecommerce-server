@@ -22,13 +22,12 @@ public class SecurityConfig {
 		return config.getAuthenticationManager();
 	}
 
-	@SuppressWarnings("removal")
 	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf().disable()
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**", "/api/users/register").permitAll() // public
-						.anyRequest().authenticated())
-				.httpBasic(); // we’ll replace with JWT filter
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(
+				auth -> auth.requestMatchers("/api/auth/**").permitAll().anyRequest().authenticated());
+
 		return http.build();
 	}
+
 }
