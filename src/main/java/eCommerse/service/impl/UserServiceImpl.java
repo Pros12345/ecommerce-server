@@ -5,7 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import eCommerse.entity.User;
-import eCommerse.repository.impl.UserRepository;
+import eCommerse.repository.UserRepository;
 import eCommerse.service.UserService;
 
 @Service
