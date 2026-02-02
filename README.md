@@ -140,7 +140,9 @@ DELETE /api/products/{id}
 **Prosenjit Chakrabortty**  
 Java Backend / Full Stack Developer  
 4+ years of experience in Java, Spring Boot, Angular, Microservices
+
 📧 Email: prosenjitmaigram@gmail.com
+
 🔗 LinkedIn: https://www.linkedin.com/in/prosenjit98
 
 ---
