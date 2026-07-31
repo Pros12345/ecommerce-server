@@ -2,15 +2,13 @@ package eCommerse.repository;
 
 import java.util.List;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import eCommerse.entity.Product;
-import eCommerse.request.GetProductsReqDTO;
+import eCommerse.entity.ProductImage;
 
 public interface ProductsDisplayRepository {
 
-	Product saveProduct(GetProductsReqDTO dto, MultipartFile imageFile);
-
 	List<Product> getAllProducts();
+
+	ProductImage getImageById(Long id);
 
 }

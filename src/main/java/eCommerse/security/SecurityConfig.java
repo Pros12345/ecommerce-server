@@ -32,9 +32,11 @@ public class SecurityConfig {
 
 		http.cors(cors -> {
 		}).csrf(csrf -> csrf.disable())
-				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/api/auth/**", "/api/users/**", "/api/products/**", "/api/productsDisplay/**")
-						.permitAll().anyRequest().authenticated());
+				.authorizeHttpRequests(
+						auth -> auth
+								.requestMatchers("/api/auth/**", "/api/users/**", "/api/products/**",
+										"/api/productsDisplay/**", "/api/images/**")
+								.permitAll().anyRequest().authenticated());
 
 		return http.build();
 	}

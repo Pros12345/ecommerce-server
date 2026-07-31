@@ -4,16 +4,15 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import eCommerse.entity.Product;
+import eCommerse.entity.ProductImage;
 import eCommerse.repository.ProductsDisplayRepository;
-import eCommerse.request.GetProductsReqDTO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 @Repository
-@Transactional
+@Transactional(readOnly = true)
 public class ProductsDisplayRepositoryImpl implements ProductsDisplayRepository {
 
 	@PersistenceContext
@@ -28,8 +27,10 @@ public class ProductsDisplayRepositoryImpl implements ProductsDisplayRepository 
 	}
 
 	@Override
-	public Product saveProduct(GetProductsReqDTO dto, MultipartFile imageFile) {
-		return null;
+	public ProductImage getImageById(Long id) {
+
+		return entityManager.find(ProductImage.class, id);
+
 	}
 
 }
