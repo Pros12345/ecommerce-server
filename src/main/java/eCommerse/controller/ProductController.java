@@ -11,23 +11,23 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import eCommerse.entity.Product;
 import eCommerse.request.GetProductsReqDTO;
 import eCommerse.service.ProductsService;
 
 @RestController
-@RequestMapping("/api")  
+@RequestMapping("/api")
 public class ProductController {
 
 	@Autowired
 	ProductsService productsService;
 
-	@PostMapping(value = "/products", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PostMapping(value = "/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<String> addProduct(@RequestPart("product") GetProductsReqDTO getProductsReqDTO,
+			@RequestPart("images") MultipartFile[] getProductsimages) throws IOException {
 
-	public ResponseEntity<Product> addProduct(@RequestPart("product") GetProductsReqDTO getProductsReqDTO,
-			@RequestPart("image") MultipartFile imageFile) throws IOException {
+		productsService.saveProduct(getProductsReqDTO, getProductsimages);
 
-		Product savedProduct = productsService.saveProduct(getProductsReqDTO, imageFile);
-		return ResponseEntity.ok(savedProduct);
+		return ResponseEntity.ok("Product saved successfully");
 	}
+
 }

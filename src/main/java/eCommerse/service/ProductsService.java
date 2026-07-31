@@ -7,5 +7,5 @@ import eCommerse.request.GetProductsReqDTO;
 
 public interface ProductsService {
 
-	public Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile imageFile);
+	public Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile[] getProductsimages);
 }

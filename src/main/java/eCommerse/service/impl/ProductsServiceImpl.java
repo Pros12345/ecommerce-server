@@ -18,9 +18,9 @@ public class ProductsServiceImpl implements ProductsService {
 	ProductsRepositoryImpl productsRepositoryImpl;
 
 	@Override
-	public Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile imageFile) {
+	public Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile[] getProductsimages) {
 
-		Product savedProduct = productsRepositoryImpl.saveProduct(getProductsReqDTO, imageFile);
+		Product savedProduct = productsRepositoryImpl.saveProduct(getProductsReqDTO, getProductsimages);
 		return savedProduct;
 	}
 }

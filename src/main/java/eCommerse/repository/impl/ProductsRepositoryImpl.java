@@ -1,12 +1,11 @@
 package eCommerse.repository.impl;
 
-import java.util.UUID;
-
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import eCommerse.entity.Product;
+import eCommerse.entity.ProductImage;
 import eCommerse.repository.ProductsRepository;
 import eCommerse.request.GetProductsReqDTO;
 import jakarta.persistence.EntityManager;
@@ -20,24 +19,43 @@ public class ProductsRepositoryImpl implements ProductsRepository {
 	private EntityManager entityManager;
 
 	@Override
-	public Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile imageFile) {
+	public Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile[] getProductsimages) {
 
-		Product product = new Product();
+		try {
 
-		product.setName(getProductsReqDTO.getName());
-		product.setDescription(getProductsReqDTO.getDescription());
-		product.setQuantity(getProductsReqDTO.getQuantity());
+			Product product = new Product();
 
-		String originalName = imageFile.getOriginalFilename();
-		String uniqueName = UUID.randomUUID() + "_" + originalName;
+			product.setName(getProductsReqDTO.getName());
+			product.setDescription(getProductsReqDTO.getDescription());
+			product.setQuantity(getProductsReqDTO.getQuantity());
+			product.setPrice(getProductsReqDTO.getPrice());
 
-		product.setImageOriginalName(originalName);
-		product.setImageUniqueName(uniqueName);
+			for (MultipartFile file : getProductsimages) {
 
-		product.setPrice(getProductsReqDTO.getPrice());
+				ProductImage productImage = new ProductImage();
 
-		entityManager.persist(product);
+				productImage.setFileName(file.getOriginalFilename());
 
-		return product;
+				productImage.setContentType(file.getContentType());
+
+				productImage.setImageData(file.getBytes());
+
+				productImage.setProduct(product);
+
+				product.getImages().add(productImage);
+
+			}
+
+			entityManager.persist(product);
+
+			return product;
+
+		} catch (Exception ex) {
+
+			throw new RuntimeException(ex);
+
+		}
+
 	}
+
 }
