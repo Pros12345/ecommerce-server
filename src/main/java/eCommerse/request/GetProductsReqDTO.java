@@ -19,4 +19,6 @@ public class GetProductsReqDTO {
 
 	private Integer quantity;
 
+	private double price;
+
 }

@@ -1,5 +1,6 @@
 package eCommerse.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,9 +31,12 @@ public class Product {
 
 	private Integer quantity;
 
-	private String imageUniqueName;
-
+	@Column(name = "image_original_name")
 	private String imageOriginalName;
 
-	private String imagePath;
+	@Column(name = "image_unique_name")
+	private String imageUniqueName;
+
+	@Column(name = "price")
+	private double price;
 }

@@ -2,6 +2,7 @@ package eCommerse.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import eCommerse.entity.Product;
@@ -10,6 +11,7 @@ import eCommerse.request.GetProductsReqDTO;
 import eCommerse.service.ProductsService;
 
 @Service
+@Transactional
 public class ProductsServiceImpl implements ProductsService {
 
 	@Autowired
