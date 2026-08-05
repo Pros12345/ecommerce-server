@@ -46,12 +46,19 @@ public class SecurityConfig {
 
 		CorsConfiguration configuration = new CorsConfiguration();
 
-		configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+		configuration.setAllowedOrigins(List.of("http://localhost:4200",
+				"https://ecommerce-client-git-firstproject-pros12345s-projects.vercel.app",
+				"https://ecommerce-client-mu-ten.vercel.app",
+				"https://ecommerce-client-7hsj2lhwp-pros12345s-projects.vercel.app"));
+
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
 		configuration.setAllowedHeaders(List.of("*"));
+
 		configuration.setAllowCredentials(true);
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
 		source.registerCorsConfiguration("/**", configuration);
 
 		return source;
