@@ -42,8 +42,8 @@ public class Product {
 	@Column(name = "price")
 	private double price;
 
-	@Column(name = "status")
-	private String status;
+	@Column(name = "status", nullable = false)
+	private String status = "Active";
 
 	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	@JsonManagedReference

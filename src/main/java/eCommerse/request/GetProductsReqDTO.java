@@ -21,4 +21,6 @@ public class GetProductsReqDTO {
 
 	private double price;
 
+	private String status;
+
 }

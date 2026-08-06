@@ -31,7 +31,7 @@ public class ProductsDisplayRepositoryImpl implements ProductsDisplayRepository 
 
 		String jpql = null;
 		try {
-			jpql = "SELECT p FROM Product p WHERE p.quantity > 0 AND p.status = 'Active'";
+			jpql = "SELECT p FROM Product p WHERE p.quantity > 0";
 		} catch (Exception e) {
 			logger.error("ProductsDisplayRepositoryImpl : getAllProducts :: error" + e.getMessage());
 		}
@@ -85,6 +85,7 @@ public class ProductsDisplayRepositoryImpl implements ProductsDisplayRepository 
 		product.setDescription(dto.getDescription());
 		product.setPrice(dto.getPrice());
 		product.setQuantity(dto.getQuantity());
+		product.setStatus("Inactive".equalsIgnoreCase(dto.getStatus()) ? "Inactive" : "Active");
 		entityManager.merge(product);
 
 		if (deletedImageIds != null) {
