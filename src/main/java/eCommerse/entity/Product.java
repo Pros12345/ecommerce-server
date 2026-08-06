@@ -39,14 +39,11 @@ public class Product {
 
 	private Integer quantity;
 
-	@Column(name = "image_original_name")
-	private String imageOriginalName;
-
-	@Column(name = "image_unique_name")
-	private String imageUniqueName;
-
 	@Column(name = "price")
 	private double price;
+
+	@Column(name = "status")
+	private String status;
 
 	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
 	@JsonManagedReference

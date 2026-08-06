@@ -1,5 +1,7 @@
 package eCommerse.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,13 +16,18 @@ import eCommerse.service.ProductsService;
 @Transactional
 public class ProductsServiceImpl implements ProductsService {
 
+	private static final Logger logger = LoggerFactory.getLogger(ProductsServiceImpl.class);
+
 	@Autowired
 	ProductsRepositoryImpl productsRepositoryImpl;
 
 	@Override
 	public Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile[] getProductsimages) {
 
+		logger.info("ProductsServiceImpl : saveProduct :: Started");
 		Product savedProduct = productsRepositoryImpl.saveProduct(getProductsReqDTO, getProductsimages);
+		logger.info("ProductsServiceImpl : saveProduct :: Ended");
+
 		return savedProduct;
 	}
 }

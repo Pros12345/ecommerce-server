@@ -1,7 +1,8 @@
 package eCommerse.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,8 @@ import eCommerse.service.UserService;
 @Service
 public class UserServiceImpl implements UserService {
 
+	private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
 	@Autowired
 	private UserRepository userRepository;
 
@@ -20,11 +23,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User registerUser(User user) {
+
+		logger.info("UserServiceImpl : registerUser :: Started");
+
 		if (userRepository.existsByEmail(user.getEmail())) {
 			throw new RuntimeException("Email already exists!");
 		}
-		// hash password before saving
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		logger.info("UserServiceImpl : registerUser :: Ended");
+
 		return userRepository.save(user);
 	}
 }

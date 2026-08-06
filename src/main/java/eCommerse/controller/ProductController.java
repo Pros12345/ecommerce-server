@@ -2,6 +2,8 @@ package eCommerse.controller;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import eCommerse.service.ProductsService;
 @RequestMapping("/api")
 public class ProductController {
 
+	private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
 	@Autowired
 	ProductsService productsService;
 
@@ -25,8 +28,9 @@ public class ProductController {
 	public ResponseEntity<String> addProduct(@RequestPart("product") GetProductsReqDTO getProductsReqDTO,
 			@RequestPart("images") MultipartFile[] getProductsimages) throws IOException {
 
+		logger.info("ProductController : addProduct :: Started");
 		productsService.saveProduct(getProductsReqDTO, getProductsimages);
-
+		logger.info("ProductController : addProduct :: Ended");
 		return ResponseEntity.ok("Product saved successfully");
 	}
 

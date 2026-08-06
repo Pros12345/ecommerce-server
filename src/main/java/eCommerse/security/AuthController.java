@@ -1,5 +1,7 @@
 package eCommerse.security;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,7 +16,7 @@ import eCommerse.repository.UserRepository;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-	
+	private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
@@ -27,6 +29,9 @@ public class AuthController {
 
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody User loginData) {
+
+		logger.info("AuthController : login :: Started");
+
 		return userRepository.findByEmail(loginData.getEmail()).map(user -> {
 			System.out.println("Login attempt: " + loginData.getEmail());
 			System.out.println("Raw password: " + loginData.getPassword());
