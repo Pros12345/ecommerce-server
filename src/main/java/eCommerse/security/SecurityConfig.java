@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -38,16 +39,11 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-		logger.info("SecurityConfig : securityFilterChain :: Started");
-		http.cors(cors -> {
-		}).csrf(csrf -> csrf.disable())
-				.authorizeHttpRequests(
-						auth -> auth
-								.requestMatchers("/api/auth/**", "/api/users/**", "/api/products/**",
-										"/api/productsDisplay/**", "/api/images/**")
-								.permitAll().anyRequest().authenticated());
-
-		logger.info("SecurityConfig : securityFilterChain :: Ended");
+		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(corsConfigurationSource()))
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll().requestMatchers("/api/auth/**",
+								"/api/users/**", "/api/products/**", "/api/productsDisplay/**", "/api/images/**")
+						.permitAll().anyRequest().authenticated());
 
 		return http.build();
 	}
@@ -58,10 +54,7 @@ public class SecurityConfig {
 		logger.info("SecurityConfig : corsConfigurationSource :: Started");
 
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("http://localhost:4200",
-				"https://ecommerce-client-git-firstproject-pros12345s-projects.vercel.app",
-				"https://ecommerce-client-mu-ten.vercel.app",
-				"https://ecommerce-client-7hsj2lhwp-pros12345s-projects.vercel.app"));
+		configuration.setAllowedOriginPatterns(List.of("http://localhost:4200", "https://*.vercel.app"));
 
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("*"));
