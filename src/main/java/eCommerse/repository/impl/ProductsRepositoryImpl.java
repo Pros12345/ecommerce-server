@@ -53,4 +53,36 @@ public class ProductsRepositoryImpl implements ProductsRepository {
 		}
 		return product;
 	}
+
+	@Override
+	public void permanentlyDeleteProduct(Long productId) {
+
+		logger.info("ProductsRepositoryImpl : permanentlyDeleteProduct :: Started");
+
+		try {
+
+			Product product = entityManager.find(Product.class, productId);
+
+			if (product == null) {
+				throw new RuntimeException("Product not found with id: " + productId);
+			}
+
+			// This deletes Product.
+			// Because of cascade + orphanRemoval,
+			// ProductImage records are deleted as well.
+			entityManager.remove(product);
+
+			entityManager.flush();
+
+			logger.info("Product and its images permanently deleted. Product ID: {}", productId);
+
+			logger.info("ProductsRepositoryImpl : permanentlyDeleteProduct :: Ended");
+
+		} catch (Exception ex) {
+
+			logger.error("ProductsRepositoryImpl : permanentlyDeleteProduct :: Error", ex);
+
+			throw ex;
+		}
+	}
 }

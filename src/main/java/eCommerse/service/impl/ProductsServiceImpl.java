@@ -25,9 +25,21 @@ public class ProductsServiceImpl implements ProductsService {
 	public Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile[] getProductsimages) {
 
 		logger.info("ProductsServiceImpl : saveProduct :: Started");
+
 		Product savedProduct = productsRepositoryImpl.saveProduct(getProductsReqDTO, getProductsimages);
+
 		logger.info("ProductsServiceImpl : saveProduct :: Ended");
 
 		return savedProduct;
+	}
+
+	@Override
+	public void permanentlyDeleteProduct(Long productId) {
+
+		logger.info("ProductsServiceImpl : permanentlyDeleteProduct :: Started");
+
+		productsRepositoryImpl.permanentlyDeleteProduct(productId);
+
+		logger.info("ProductsServiceImpl : permanentlyDeleteProduct :: Ended");
 	}
 }

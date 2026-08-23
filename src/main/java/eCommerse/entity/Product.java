@@ -35,6 +35,7 @@ public class Product {
 
 	private String name;
 
+	@Column(name = "description", length = 1000)
 	private String description;
 
 	private Integer quantity;

@@ -7,6 +7,7 @@ import eCommerse.request.GetProductsReqDTO;
 
 public interface ProductsRepository {
 
-	public Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile[] getProductsimages);
+	Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile[] getProductsimages);
 
+	void permanentlyDeleteProduct(Long productId);
 }

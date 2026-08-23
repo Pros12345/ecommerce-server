@@ -40,10 +40,11 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
 		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(corsConfigurationSource()))
-				.authorizeHttpRequests(auth -> auth
-						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll().requestMatchers("/api/auth/**",
-								"/api/users/**", "/api/products/**", "/api/productsDisplay/**", "/api/images/**")
-						.permitAll().anyRequest().authenticated());
+				.authorizeHttpRequests(
+						auth -> auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+								.requestMatchers("/api/auth/**", "/api/users/**", "/api/products/**",
+										"/api/productsDisplay/**", "/api/images/**", "/api/permanent/**")
+								.permitAll().anyRequest().authenticated());
 
 		return http.build();
 	}

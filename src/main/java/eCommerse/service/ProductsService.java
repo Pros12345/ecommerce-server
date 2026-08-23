@@ -7,5 +7,7 @@ import eCommerse.request.GetProductsReqDTO;
 
 public interface ProductsService {
 
-	public Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile[] getProductsimages);
+	Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile[] getProductsimages);
+
+	void permanentlyDeleteProduct(Long productId);
 }

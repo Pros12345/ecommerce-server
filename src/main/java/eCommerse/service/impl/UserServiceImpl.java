@@ -26,10 +26,19 @@ public class UserServiceImpl implements UserService {
 
 		logger.info("UserServiceImpl : registerUser :: Started");
 
+		// Check email
 		if (userRepository.existsByEmail(user.getEmail())) {
 			throw new RuntimeException("Email already exists!");
 		}
+
+		// Check mobile
+		if (userRepository.existsByMobileNumber(user.getMobileNumber())) {
+			throw new RuntimeException("Mobile number already exists!");
+		}
+
+		// Encode password
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
+
 		logger.info("UserServiceImpl : registerUser :: Ended");
 
 		return userRepository.save(user);
