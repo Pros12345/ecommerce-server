@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -22,10 +23,18 @@ public class SecurityConfig {
 
 	private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
 
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+	public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+
+		this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+	}
+
 	@Bean
 	PasswordEncoder passwordEncoder() {
 
 		logger.info("SecurityConfig : passwordEncoder :: Started");
+
 		return new BCryptPasswordEncoder();
 	}
 
@@ -33,18 +42,39 @@ public class SecurityConfig {
 	AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
 
 		logger.info("SecurityConfig : authManager :: Started");
+
 		return config.getAuthenticationManager();
 	}
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-		http.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(corsConfigurationSource()))
-				.authorizeHttpRequests(
-						auth -> auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-								.requestMatchers("/api/auth/**", "/api/users/**", "/api/products/**",
-										"/api/productsDisplay/**", "/api/images/**", "/api/permanent/**")
-								.permitAll().anyRequest().authenticated());
+		logger.info("SecurityConfig : securityFilterChain :: Started");
+
+		http.csrf(csrf -> csrf.disable())
+
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+				.authorizeHttpRequests(auth -> auth
+
+						// CORS preflight
+						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+						// Public APIs
+						.requestMatchers("/api/auth/**", "/api/users/**", "/api/products/**", "/api/productsDisplay/**",
+								"/api/images/**", "/api/permanent/**")
+						.permitAll()
+
+						// Authenticated user APIs
+						.requestMatchers("/api/user/**").authenticated()
+
+						// Everything else requires authentication
+						.anyRequest().authenticated())
+
+				// VERY IMPORTANT
+				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+		logger.info("SecurityConfig : securityFilterChain :: Ended");
 
 		return http.build();
 	}
@@ -55,12 +85,17 @@ public class SecurityConfig {
 		logger.info("SecurityConfig : corsConfigurationSource :: Started");
 
 		CorsConfiguration configuration = new CorsConfiguration();
+
 		configuration.setAllowedOriginPatterns(List.of("http://localhost:4200", "https://*.vercel.app"));
 
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
 		configuration.setAllowedHeaders(List.of("*"));
+
 		configuration.setAllowCredentials(true);
+
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
 		source.registerCorsConfiguration("/**", configuration);
 
 		logger.info("SecurityConfig : corsConfigurationSource :: Ended");
