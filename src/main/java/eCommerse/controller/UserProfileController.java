@@ -35,10 +35,6 @@ public class UserProfileController {
 		this.passwordEncoder = passwordEncoder;
 	}
 
-	// ==========================================
-	// GET PROFILE
-	// ==========================================
-
 	@GetMapping("/profile")
 	public ResponseEntity<?> getProfile(Authentication authentication) {
 
@@ -57,23 +53,11 @@ public class UserProfileController {
 		return ResponseEntity.ok(response);
 	}
 
-	// ==========================================
-	// UPDATE PROFILE
-	// ==========================================
-
 	@PutMapping("/profile")
 	public ResponseEntity<?> updateProfile(Authentication authentication,
 			@Valid @RequestBody UpdateProfileRequest request) {
 
-		// --------------------------------------
-		// Get currently logged-in user's email
-		// --------------------------------------
-
 		String currentEmail = authentication.getName();
-
-		// --------------------------------------
-		// Find current user
-		// --------------------------------------
 
 		User user = userRepository.findByEmail(currentEmail).orElse(null);
 
@@ -82,20 +66,12 @@ public class UserProfileController {
 			return ResponseEntity.status(404).body(Map.of("message", "User not found"));
 		}
 
-		// --------------------------------------
-		// Verify current password
-		// --------------------------------------
-
 		boolean passwordMatches = passwordEncoder.matches(request.getCurrentPassword(), user.getPassword());
 
 		if (!passwordMatches) {
 
 			return ResponseEntity.status(401).body(Map.of("message", "Current password is incorrect"));
 		}
-
-		// --------------------------------------
-		// Check email uniqueness
-		// --------------------------------------
 
 		if (!currentEmail.equalsIgnoreCase(request.getEmail())) {
 
@@ -107,10 +83,6 @@ public class UserProfileController {
 			}
 		}
 
-		// --------------------------------------
-		// Update profile
-		// --------------------------------------
-
 		user.setFirstName(request.getFirstName());
 
 		user.setEmail(request.getEmail());
@@ -119,25 +91,13 @@ public class UserProfileController {
 
 		user.setMobileNumber(request.getMobileNumber());
 
-		// --------------------------------------
-		// Save
-		// --------------------------------------
-
 		userRepository.save(user);
-
-		// --------------------------------------
-		// Response
-		// --------------------------------------
 
 		UserProfileResponse response = new UserProfileResponse(user.getId(), user.getFirstName(), user.getEmail(),
 				user.getCountryCode(), user.getMobileNumber());
 
 		return ResponseEntity.ok(response);
 	}
-
-	// ==========================================
-	// CHANGE PASSWORD
-	// ==========================================
 
 	@PutMapping("/change-password")
 	public ResponseEntity<?> changePassword(Authentication authentication,
@@ -152,18 +112,10 @@ public class UserProfileController {
 			return ResponseEntity.status(404).body(Map.of("message", "User not found"));
 		}
 
-		// --------------------------------------
-		// Verify current password
-		// --------------------------------------
-
 		if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
 
 			return ResponseEntity.status(401).body(Map.of("message", "Current password is incorrect"));
 		}
-
-		// --------------------------------------
-		// Confirm new password
-		// --------------------------------------
 
 		if (!request.getNewPassword().equals(request.getConfirmPassword())) {
 
@@ -171,19 +123,11 @@ public class UserProfileController {
 					.body(Map.of("message", "New password and confirm password do not match"));
 		}
 
-		// --------------------------------------
-		// Prevent same password
-		// --------------------------------------
-
 		if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
 
 			return ResponseEntity.badRequest()
 					.body(Map.of("message", "New password must be different from current password"));
 		}
-
-		// --------------------------------------
-		// Encode and save new password
-		// --------------------------------------
 
 		user.setPassword(passwordEncoder.encode(request.getNewPassword()));
 
@@ -192,23 +136,11 @@ public class UserProfileController {
 		return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
 	}
 
-	// ==========================================
-	// DELETE ACCOUNT
-	// ==========================================
-
 	@DeleteMapping("/profile")
 	public ResponseEntity<?> deleteAccount(Authentication authentication,
 			@Valid @RequestBody DeleteAccountRequest request) {
 
-		// --------------------------------------
-		// Get currently logged-in user's email
-		// --------------------------------------
-
 		String currentEmail = authentication.getName();
-
-		// --------------------------------------
-		// Find user
-		// --------------------------------------
 
 		User user = userRepository.findByEmail(currentEmail).orElse(null);
 
@@ -217,10 +149,6 @@ public class UserProfileController {
 			return ResponseEntity.status(404).body(Map.of("message", "User not found"));
 		}
 
-		// --------------------------------------
-		// Verify current password
-		// --------------------------------------
-
 		boolean passwordMatches = passwordEncoder.matches(request.getCurrentPassword(), user.getPassword());
 
 		if (!passwordMatches) {
@@ -228,12 +156,9 @@ public class UserProfileController {
 			return ResponseEntity.status(401).body(Map.of("message", "Current password is incorrect"));
 		}
 
-		// --------------------------------------
-		// Delete user
-		// --------------------------------------
-
 		userRepository.delete(user);
 
 		return ResponseEntity.ok(Map.of("message", "Account deleted successfully"));
 	}
+
 }
