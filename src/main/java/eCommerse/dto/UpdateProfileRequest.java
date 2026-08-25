@@ -21,4 +21,7 @@ public class UpdateProfileRequest {
 
 	@NotBlank(message = "Mobile number is required")
 	private String mobileNumber;
+
+	@NotBlank(message = "Current password is required")
+	private String currentPassword;
 }

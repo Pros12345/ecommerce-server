@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import eCommerse.dto.ChangePasswordRequest;
+import eCommerse.dto.DeleteAccountRequest;
 import eCommerse.dto.UpdateProfileRequest;
 import eCommerse.dto.UserProfileResponse;
 import eCommerse.entity.User;
@@ -23,11 +25,13 @@ import jakarta.validation.Valid;
 public class UserProfileController {
 
 	private final UserRepository userRepository;
+
 	private final PasswordEncoder passwordEncoder;
 
 	public UserProfileController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 
 		this.userRepository = userRepository;
+
 		this.passwordEncoder = passwordEncoder;
 	}
 
@@ -43,7 +47,8 @@ public class UserProfileController {
 		User user = userRepository.findByEmail(email).orElse(null);
 
 		if (user == null) {
-			return ResponseEntity.status(404).body("User not found");
+
+			return ResponseEntity.status(404).body(Map.of("message", "User not found"));
 		}
 
 		UserProfileResponse response = new UserProfileResponse(user.getId(), user.getFirstName(), user.getEmail(),
@@ -60,12 +65,32 @@ public class UserProfileController {
 	public ResponseEntity<?> updateProfile(Authentication authentication,
 			@Valid @RequestBody UpdateProfileRequest request) {
 
+		// --------------------------------------
+		// Get currently logged-in user's email
+		// --------------------------------------
+
 		String currentEmail = authentication.getName();
+
+		// --------------------------------------
+		// Find current user
+		// --------------------------------------
 
 		User user = userRepository.findByEmail(currentEmail).orElse(null);
 
 		if (user == null) {
-			return ResponseEntity.status(404).body("User not found");
+
+			return ResponseEntity.status(404).body(Map.of("message", "User not found"));
+		}
+
+		// --------------------------------------
+		// Verify current password
+		// --------------------------------------
+
+		boolean passwordMatches = passwordEncoder.matches(request.getCurrentPassword(), user.getPassword());
+
+		if (!passwordMatches) {
+
+			return ResponseEntity.status(401).body(Map.of("message", "Current password is incorrect"));
 		}
 
 		// --------------------------------------
@@ -74,9 +99,11 @@ public class UserProfileController {
 
 		if (!currentEmail.equalsIgnoreCase(request.getEmail())) {
 
-			if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+			boolean emailExists = userRepository.findByEmail(request.getEmail()).isPresent();
 
-				return ResponseEntity.badRequest().body("Email already exists");
+			if (emailExists) {
+
+				return ResponseEntity.badRequest().body(Map.of("message", "Email already exists"));
 			}
 		}
 
@@ -85,11 +112,22 @@ public class UserProfileController {
 		// --------------------------------------
 
 		user.setFirstName(request.getFirstName());
+
 		user.setEmail(request.getEmail());
+
 		user.setCountryCode(request.getCountryCode());
+
 		user.setMobileNumber(request.getMobileNumber());
 
+		// --------------------------------------
+		// Save
+		// --------------------------------------
+
 		userRepository.save(user);
+
+		// --------------------------------------
+		// Response
+		// --------------------------------------
 
 		UserProfileResponse response = new UserProfileResponse(user.getId(), user.getFirstName(), user.getEmail(),
 				user.getCountryCode(), user.getMobileNumber());
@@ -110,34 +148,92 @@ public class UserProfileController {
 		User user = userRepository.findByEmail(email).orElse(null);
 
 		if (user == null) {
+
 			return ResponseEntity.status(404).body(Map.of("message", "User not found"));
 		}
 
+		// --------------------------------------
 		// Verify current password
+		// --------------------------------------
+
 		if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
 
 			return ResponseEntity.status(401).body(Map.of("message", "Current password is incorrect"));
 		}
 
+		// --------------------------------------
 		// Confirm new password
+		// --------------------------------------
+
 		if (!request.getNewPassword().equals(request.getConfirmPassword())) {
 
 			return ResponseEntity.badRequest()
 					.body(Map.of("message", "New password and confirm password do not match"));
 		}
 
+		// --------------------------------------
 		// Prevent same password
+		// --------------------------------------
+
 		if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
 
 			return ResponseEntity.badRequest()
 					.body(Map.of("message", "New password must be different from current password"));
 		}
 
-		// Encode and save
+		// --------------------------------------
+		// Encode and save new password
+		// --------------------------------------
+
 		user.setPassword(passwordEncoder.encode(request.getNewPassword()));
 
 		userRepository.save(user);
 
 		return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
+	}
+
+	// ==========================================
+	// DELETE ACCOUNT
+	// ==========================================
+
+	@DeleteMapping("/profile")
+	public ResponseEntity<?> deleteAccount(Authentication authentication,
+			@Valid @RequestBody DeleteAccountRequest request) {
+
+		// --------------------------------------
+		// Get currently logged-in user's email
+		// --------------------------------------
+
+		String currentEmail = authentication.getName();
+
+		// --------------------------------------
+		// Find user
+		// --------------------------------------
+
+		User user = userRepository.findByEmail(currentEmail).orElse(null);
+
+		if (user == null) {
+
+			return ResponseEntity.status(404).body(Map.of("message", "User not found"));
+		}
+
+		// --------------------------------------
+		// Verify current password
+		// --------------------------------------
+
+		boolean passwordMatches = passwordEncoder.matches(request.getCurrentPassword(), user.getPassword());
+
+		if (!passwordMatches) {
+
+			return ResponseEntity.status(401).body(Map.of("message", "Current password is incorrect"));
+		}
+
+		// --------------------------------------
+		// Delete user
+		// --------------------------------------
+
+		userRepository.delete(user);
+
+		return ResponseEntity.ok(Map.of("message", "Account deleted successfully"));
 	}
 }
