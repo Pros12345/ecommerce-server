@@ -10,4 +10,8 @@ public interface ProductsRepository {
 	Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile[] getProductsimages);
 
 	void permanentlyDeleteProduct(Long productId);
+
+	int reduceStock(Long productId, Integer quantity);
+
+	Product findById(Long productId);
 }

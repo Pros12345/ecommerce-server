@@ -85,4 +85,30 @@ public class ProductsRepositoryImpl implements ProductsRepository {
 			throw ex;
 		}
 	}
+
+	@Override
+	public int reduceStock(Long productId, Integer quantity) {
+
+		logger.info("ProductsRepositoryImpl : reduceStock :: Started");
+
+		String jpql = """
+				UPDATE Product p
+				SET p.quantity = p.quantity - :quantity
+				WHERE p.id = :productId
+				AND p.quantity >= :quantity
+				""";
+
+		int updatedRows = entityManager.createQuery(jpql).setParameter("quantity", quantity)
+				.setParameter("productId", productId).executeUpdate();
+
+		logger.info("ProductsRepositoryImpl : reduceStock :: Updated rows {}", updatedRows);
+
+		return updatedRows;
+	}
+
+	@Override
+	public Product findById(Long productId) {
+
+		return entityManager.find(Product.class, productId);
+	}
 }
