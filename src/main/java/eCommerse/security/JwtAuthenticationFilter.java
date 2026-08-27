@@ -39,13 +39,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		String authHeader = request.getHeader("Authorization");
 
-		logger.info("Authorization Header: {}", authHeader);
+		/*
+		 * IMPORTANT: Never log the actual JWT token.
+		 */
+		logger.info("Authorization Header present: {}", authHeader != null);
 
+		/*
+		 * No Authorization header
+		 */
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 
 			logger.info("No Bearer token found");
 
 			filterChain.doFilter(request, response);
+
 			return;
 		}
 
@@ -71,10 +78,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		} catch (Exception e) {
 
-			logger.error("JWT validation failed", e);
+			logger.error("JWT validation failed: {}", e.getMessage());
 
 			SecurityContextHolder.clearContext();
+
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+			response.setContentType("application/json");
+
+			response.getWriter().write("{\"message\":\"Invalid or expired JWT token\"}");
+
+			return;
 		}
+
+		/*
+		 * Diagnostic logging.
+		 *
+		 * This will help us verify that authentication exists before the remaining
+		 * Spring Security filters execute.
+		 */
+		logger.info("Before filter chain - Method: {}, URI: {}, Origin: {}, Authenticated: {}", request.getMethod(),
+				request.getRequestURI(), request.getHeader("Origin"),
+				SecurityContextHolder.getContext().getAuthentication() != null);
 
 		filterChain.doFilter(request, response);
 	}

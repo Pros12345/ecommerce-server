@@ -1,5 +1,6 @@
 package eCommerse.security;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
@@ -14,45 +15,68 @@ import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
+
+	/*
+	 * IMPORTANT:
+	 *
+	 * For production, this should eventually come from a Railway environment
+	 * variable instead of being hard-coded.
+	 */
 	private final String SECRET_KEY = "mySuperSecretKeyThatIsAtLeast32CharsLong!";
+
 	private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
-	private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 10;
+	/*
+	 * JWT validity: 10 hours
+	 */
+	private static final long EXPIRATION_TIME = 1000L * 60 * 60 * 10;
 
 	private Key getSigningKey() {
 
 		logger.info("JwtUtil : getSigningKey :: Started");
-		return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+
+		return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 	}
 
 	public String generateToken(String username) {
 
 		logger.info("JwtUtil : generateToken :: Started");
-		return Jwts.builder().setSubject(username).setIssuedAt(new Date())
-				.setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+
+		Date issuedAt = new Date();
+
+		Date expiration = new Date(issuedAt.getTime() + EXPIRATION_TIME);
+
+		return Jwts.builder().setSubject(username).setIssuedAt(issuedAt).setExpiration(expiration)
 				.signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();
 	}
 
 	public String extractUsername(String token) {
 
 		logger.info("JwtUtil : extractUsername :: Started");
+
 		return extractAllClaims(token).getSubject();
 	}
 
 	public boolean validateToken(String token, String username) {
 
 		logger.info("JwtUtil : validateToken :: Started");
+
 		final String extractedUsername = extractUsername(token);
-		return (extractedUsername.equals(username) && !isTokenExpired(token));
+
+		return extractedUsername.equals(username) && !isTokenExpired(token);
 	}
 
 	private boolean isTokenExpired(String token) {
+
 		logger.info("JwtUtil : isTokenExpired :: Started");
+
 		return extractAllClaims(token).getExpiration().before(new Date());
 	}
 
 	private Claims extractAllClaims(String token) {
+
 		logger.info("JwtUtil : extractAllClaims :: Started");
+
 		return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody();
 	}
 }
