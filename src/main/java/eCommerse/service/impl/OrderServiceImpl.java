@@ -252,17 +252,36 @@ public class OrderServiceImpl implements OrderService {
 
 			OrderItemResponse itemResponse = new OrderItemResponse();
 
-			itemResponse.setProductId(orderItem.getProduct().getId());
+			Product product = orderItem.getProduct();
 
-			itemResponse.setProductName(orderItem.getProduct().getName());
+			// ==========================================
+			// PRODUCT DETAILS
+			// ==========================================
+
+			itemResponse.setProductId(product.getId());
+
+			itemResponse.setProductName(product.getName());
 
 			itemResponse.setQuantity(orderItem.getQuantity());
 
 			itemResponse.setPrice(orderItem.getPrice());
 
+			// ==========================================
+			// ITEM TOTAL
+			// ==========================================
+
 			BigDecimal itemTotal = orderItem.getPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity()));
 
 			itemResponse.setTotal(itemTotal);
+
+			// ==========================================
+			// FIRST PRODUCT IMAGE
+			// ==========================================
+
+			if (product.getImages() != null && !product.getImages().isEmpty()) {
+
+				itemResponse.setImageId(product.getImages().get(0).getId());
+			}
 
 			items.add(itemResponse);
 		}
@@ -270,5 +289,64 @@ public class OrderServiceImpl implements OrderService {
 		response.setItems(items);
 
 		return response;
+	}
+
+	@Override
+	public List<OrderResponse> getMyOrders() {
+
+		User user = getLoggedInUser();
+
+		List<Order> orders = orderRepository.findOrdersByUser(user);
+
+		List<OrderResponse> responses = new ArrayList<>();
+
+		for (Order order : orders) {
+
+			responses.add(convertToResponse(order, order.getAddress()));
+		}
+
+		return responses;
+	}
+
+	@Override
+	public OrderResponse cancelOrder(Long orderId) {
+
+		User user = getLoggedInUser();
+
+		Order order = orderRepository.findOrderByIdAndUser(orderId, user);
+
+		if (order == null) {
+
+			throw new RuntimeException("Order not found");
+		}
+
+		if ("CANCELLED".equalsIgnoreCase(order.getOrderStatus())) {
+
+			throw new RuntimeException("Order is already cancelled");
+		}
+
+		order.setOrderStatus("CANCELLED");
+
+		return convertToResponse(order, order.getAddress());
+	}
+
+	@Override
+	public void deleteCancelledOrder(Long orderId) {
+
+		User user = getLoggedInUser();
+
+		Order order = orderRepository.findOrderByIdAndUser(orderId, user);
+
+		if (order == null) {
+
+			throw new RuntimeException("Order not found");
+		}
+
+		if (!"CANCELLED".equalsIgnoreCase(order.getOrderStatus())) {
+
+			throw new RuntimeException("Only cancelled orders can be deleted");
+		}
+
+		orderRepository.deleteOrder(order);
 	}
 }

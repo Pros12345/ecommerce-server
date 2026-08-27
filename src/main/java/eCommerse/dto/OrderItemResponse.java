@@ -19,4 +19,6 @@ public class OrderItemResponse {
 
 	private BigDecimal total;
 
+	// FIRST PRODUCT IMAGE
+	private Long imageId;
 }
