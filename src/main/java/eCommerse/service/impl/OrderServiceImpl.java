@@ -318,6 +318,10 @@ public class OrderServiceImpl implements OrderService {
 
 		User user = getLoggedInUser();
 
+		// --------------------------------------
+		// FIND ORDER
+		// --------------------------------------
+
 		Order order = orderRepository.findOrderByIdAndUser(orderId, user);
 
 		if (order == null) {
@@ -325,12 +329,52 @@ public class OrderServiceImpl implements OrderService {
 			throw new RuntimeException("Order not found");
 		}
 
+		// --------------------------------------
+		// CHECK ALREADY CANCELLED
+		// --------------------------------------
+
 		if ("CANCELLED".equalsIgnoreCase(order.getOrderStatus())) {
 
 			throw new RuntimeException("Order is already cancelled");
 		}
 
+		// --------------------------------------
+		// RESTORE PRODUCT STOCK
+		// --------------------------------------
+
+		for (OrderItem orderItem : order.getOrderItems()) {
+
+			Product product = orderItem.getProduct();
+
+			if (product == null) {
+
+				throw new RuntimeException("Product not found for order item");
+			}
+
+			int quantity = orderItem.getQuantity();
+
+			if (quantity <= 0) {
+
+				throw new RuntimeException("Invalid order item quantity");
+			}
+
+			int updatedRows = productsRepository.increaseStock(product.getId(), quantity);
+
+			if (updatedRows == 0) {
+
+				throw new RuntimeException("Unable to restore stock for product: " + product.getName());
+			}
+		}
+
+		// --------------------------------------
+		// UPDATE ORDER STATUS
+		// --------------------------------------
+
 		order.setOrderStatus("CANCELLED");
+
+		// --------------------------------------
+		// RETURN RESPONSE
+		// --------------------------------------
 
 		return convertToResponse(order, order.getAddress());
 	}

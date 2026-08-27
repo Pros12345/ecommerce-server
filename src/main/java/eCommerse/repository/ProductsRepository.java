@@ -13,5 +13,7 @@ public interface ProductsRepository {
 
 	int reduceStock(Long productId, Integer quantity);
 
+	int increaseStock(Long productId, Integer quantity);
+
 	Product findById(Long productId);
 }

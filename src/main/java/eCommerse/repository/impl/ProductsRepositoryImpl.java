@@ -185,6 +185,23 @@ public class ProductsRepositoryImpl implements ProductsRepository {
 	}
 
 	// ==========================================
+	// INCREASE STOCK
+	// ==========================================
+
+	@Override
+	public int increaseStock(Long productId, Integer quantity) {
+
+		String jpql = """
+				UPDATE Product p
+				SET p.quantity = p.quantity + :quantity
+				WHERE p.id = :productId
+				""";
+
+		return entityManager.createQuery(jpql).setParameter("quantity", quantity).setParameter("productId", productId)
+				.executeUpdate();
+	}
+
+	// ==========================================
 	// FIND PRODUCT
 	// ==========================================
 
