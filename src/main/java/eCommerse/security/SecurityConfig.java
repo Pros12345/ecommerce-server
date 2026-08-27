@@ -18,8 +18,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 @Configuration
 public class SecurityConfig {
 
@@ -51,80 +49,23 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-		logger.info("SecurityConfig : securityFilterChain :: Started");
+		http.csrf(csrf -> csrf.disable())
 
-		http
-
-				/*
-				 * Disable CSRF because this is a REST API using JWT authentication.
-				 */
-				.csrf(csrf -> csrf.disable())
-
-				/*
-				 * Enable CORS
-				 */
 				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-				/*
-				 * Authentication / Authorization
-				 */
 				.authorizeHttpRequests(auth -> auth
 
-						/*
-						 * CORS preflight
-						 */
 						.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-						/*
-						 * Public APIs
-						 */
 						.requestMatchers("/api/auth/**", "/api/users/**", "/api/products/**", "/api/productsDisplay/**",
 								"/api/images/**", "/api/permanent/**")
 						.permitAll()
 
-						/*
-						 * Authenticated user APIs
-						 */
 						.requestMatchers("/api/user/**").authenticated()
 
-						/*
-						 * Everything else requires authentication
-						 */
 						.anyRequest().authenticated())
 
-				/*
-				 * Explicit authentication / authorization error handling.
-				 */
-				.exceptionHandling(exception -> exception
-
-						/*
-						 * 401 - User is not authenticated
-						 */
-						.authenticationEntryPoint((request, response, authException) -> {
-
-							logger.error("401 Authentication failed: {} {} - {}", request.getMethod(),
-									request.getRequestURI(), authException.getMessage());
-
-							response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-						})
-
-						/*
-						 * 403 - User is authenticated but access is denied.
-						 */
-						.accessDeniedHandler((request, response, accessDeniedException) -> {
-
-							logger.error("403 Access denied: {} {} - {}", request.getMethod(), request.getRequestURI(),
-									accessDeniedException.getMessage());
-
-							response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-						}))
-
-				/*
-				 * JWT filter must execute before UsernamePasswordAuthenticationFilter.
-				 */
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-		logger.info("SecurityConfig : securityFilterChain :: Ended");
 
 		return http.build();
 	}
@@ -132,47 +73,20 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 
-		logger.info("SecurityConfig : corsConfigurationSource :: Started");
-
 		CorsConfiguration configuration = new CorsConfiguration();
 
-		/*
-		 * IMPORTANT:
-		 *
-		 * Use the exact production Angular/Vercel URL.
-		 */
 		configuration.setAllowedOrigins(
 				List.of("http://localhost:4200", "https://ecommerce-client-pros12345s-projects.vercel.app"));
 
-		/*
-		 * Allowed HTTP methods
-		 */
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-		/*
-		 * Authorization is included here because Angular sends:
-		 *
-		 * Authorization: Bearer <JWT>
-		 */
 		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin"));
 
-		/*
-		 * Required when frontend sends credentials.
-		 */
 		configuration.setAllowCredentials(true);
 
-		/*
-		 * Register CORS configuration for every endpoint.
-		 */
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
 		source.registerCorsConfiguration("/**", configuration);
-
-		logger.info("Allowed CORS origins: {}", configuration.getAllowedOrigins());
-
-		logger.info("Allowed CORS methods: {}", configuration.getAllowedMethods());
-
-		logger.info("SecurityConfig : corsConfigurationSource :: Ended");
 
 		return source;
 	}
