@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import eCommerse.request.GetProductsReqDTO;
+import eCommerse.dto.GetProductsReqDTO;
 import eCommerse.service.ProductsService;
 
 @RestController

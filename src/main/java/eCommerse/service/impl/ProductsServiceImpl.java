@@ -7,9 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import eCommerse.dto.GetProductsReqDTO;
 import eCommerse.entity.Product;
 import eCommerse.repository.impl.ProductsRepositoryImpl;
-import eCommerse.request.GetProductsReqDTO;
 import eCommerse.service.ProductsService;
 
 @Service

@@ -2,8 +2,8 @@ package eCommerse.service;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import eCommerse.dto.GetProductsReqDTO;
 import eCommerse.entity.Product;
-import eCommerse.request.GetProductsReqDTO;
 
 public interface ProductsService {
 

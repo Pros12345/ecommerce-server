@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import eCommerse.dto.GetProductsReqDTO;
 import eCommerse.entity.Product;
 import eCommerse.entity.ProductImage;
-import eCommerse.request.GetProductsReqDTO;
 
 public interface ProductsDisplayService {
 

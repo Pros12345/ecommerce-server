@@ -6,10 +6,10 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import eCommerse.dto.GetProductsReqDTO;
 import eCommerse.entity.Product;
 import eCommerse.entity.ProductImage;
 import eCommerse.repository.ProductsRepository;
-import eCommerse.request.GetProductsReqDTO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -22,93 +22,177 @@ public class ProductsRepositoryImpl implements ProductsRepository {
 	@PersistenceContext
 	private EntityManager entityManager;
 
+	// ==========================================
+	// SAVE PRODUCT
+	// ==========================================
+
 	@Override
-	public Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile[] getProductsimages) {
+	public Product saveProduct(
+
+			GetProductsReqDTO dto,
+
+			MultipartFile[] images
+
+	) {
 
 		logger.info("ProductsRepositoryImpl : saveProduct :: Started");
 
 		Product product = new Product();
+
 		try {
-			product.setName(getProductsReqDTO.getName());
-			product.setDescription(getProductsReqDTO.getDescription());
-			product.setQuantity(getProductsReqDTO.getQuantity());
-			product.setPrice(getProductsReqDTO.getPrice());
+
+			// ----------------------------------
+			// PRODUCT DETAILS
+			// ----------------------------------
+
+			product.setName(dto.getName());
+
+			product.setDescription(dto.getDescription());
+
+			product.setQuantity(dto.getQuantity());
+
+			product.setPrice(dto.getPrice());
+
 			product.setStatus("Active");
 
-			for (MultipartFile file : getProductsimages) {
-				ProductImage productImage = new ProductImage();
-				productImage.setFileName(file.getOriginalFilename());
-				productImage.setContentType(file.getContentType());
-				productImage.setImageData(file.getBytes());
-				productImage.setProduct(product);
-				product.getImages().add(productImage);
+			// ----------------------------------
+			// PRIMARY IMAGE INDEX
+			// ----------------------------------
+
+			Integer primaryIndex = dto.getPrimaryImageIndex();
+
+			/*
+			 * If admin doesn't select anything, first image becomes primary.
+			 */
+
+			if (primaryIndex == null || primaryIndex < 0 || images == null || primaryIndex >= images.length) {
+
+				primaryIndex = 0;
+
 			}
 
+			// ----------------------------------
+			// SAVE IMAGES
+			// ----------------------------------
+
+			if (images != null && images.length > 0) {
+
+				for (int i = 0; i < images.length; i++) {
+
+					MultipartFile file = images[i];
+
+					if (file == null || file.isEmpty()) {
+
+						continue;
+
+					}
+
+					ProductImage productImage = new ProductImage();
+
+					productImage.setFileName(file.getOriginalFilename());
+
+					productImage.setContentType(file.getContentType());
+
+					productImage.setImageData(file.getBytes());
+
+					productImage.setProduct(product);
+
+					// ----------------------------------
+					// SET PRIMARY
+					// ----------------------------------
+
+					productImage.setPrimaryImage(i == primaryIndex);
+
+					product.getImages().add(productImage);
+
+				}
+
+			}
+
+			// ----------------------------------
+			// SAVE PRODUCT
+			// ----------------------------------
+
 			entityManager.persist(product);
-			logger.info("ProductsRepositoryImpl : saveProduct :: Started");
 
-		} catch (Exception ex) {
+			entityManager.flush();
 
-			logger.error("ProductsRepositoryImpl : saveProduct :: error " + ex.getMessage());
+			logger.info("Product saved successfully. ID: {}", product.getId());
+
+			return product;
+
 		}
-		return product;
+
+		catch (Exception ex) {
+
+			logger.error("ProductsRepositoryImpl : saveProduct :: Error", ex);
+
+			throw new RuntimeException("Unable to save product", ex);
+
+		}
+
 	}
+
+	// ==========================================
+	// PERMANENT DELETE
+	// ==========================================
 
 	@Override
 	public void permanentlyDeleteProduct(Long productId) {
 
 		logger.info("ProductsRepositoryImpl : permanentlyDeleteProduct :: Started");
 
-		try {
+		Product product = entityManager.find(Product.class, productId);
 
-			Product product = entityManager.find(Product.class, productId);
+		if (product == null) {
 
-			if (product == null) {
-				throw new RuntimeException("Product not found with id: " + productId);
-			}
+			throw new RuntimeException("Product not found with id: " + productId);
 
-			// This deletes Product.
-			// Because of cascade + orphanRemoval,
-			// ProductImage records are deleted as well.
-			entityManager.remove(product);
-
-			entityManager.flush();
-
-			logger.info("Product and its images permanently deleted. Product ID: {}", productId);
-
-			logger.info("ProductsRepositoryImpl : permanentlyDeleteProduct :: Ended");
-
-		} catch (Exception ex) {
-
-			logger.error("ProductsRepositoryImpl : permanentlyDeleteProduct :: Error", ex);
-
-			throw ex;
 		}
+
+		entityManager.remove(product);
+
+		entityManager.flush();
+
+		logger.info("Product permanently deleted. ID: {}", productId);
+
 	}
 
-	@Override
-	public int reduceStock(Long productId, Integer quantity) {
+	// ==========================================
+	// REDUCE STOCK
+	// ==========================================
 
-		logger.info("ProductsRepositoryImpl : reduceStock :: Started");
+	@Override
+	public int reduceStock(
+
+			Long productId,
+
+			Integer quantity
+
+	) {
 
 		String jpql = """
 				UPDATE Product p
-				SET p.quantity = p.quantity - :quantity
+				SET p.quantity =
+				    p.quantity - :quantity
 				WHERE p.id = :productId
 				AND p.quantity >= :quantity
 				""";
 
-		int updatedRows = entityManager.createQuery(jpql).setParameter("quantity", quantity)
-				.setParameter("productId", productId).executeUpdate();
+		return entityManager.createQuery(jpql).setParameter("quantity", quantity).setParameter("productId", productId)
+				.executeUpdate();
 
-		logger.info("ProductsRepositoryImpl : reduceStock :: Updated rows {}", updatedRows);
-
-		return updatedRows;
 	}
+
+	// ==========================================
+	// FIND PRODUCT
+	// ==========================================
 
 	@Override
 	public Product findById(Long productId) {
 
 		return entityManager.find(Product.class, productId);
+
 	}
+
 }

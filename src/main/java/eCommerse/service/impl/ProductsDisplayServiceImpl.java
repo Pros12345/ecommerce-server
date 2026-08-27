@@ -9,10 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import eCommerse.dto.GetProductsReqDTO;
 import eCommerse.entity.Product;
 import eCommerse.entity.ProductImage;
 import eCommerse.repository.ProductsDisplayRepository;
-import eCommerse.request.GetProductsReqDTO;
 import eCommerse.service.ProductsDisplayService;
 
 @Service

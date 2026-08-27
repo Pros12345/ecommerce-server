@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import eCommerse.dto.GetProductsReqDTO;
 import eCommerse.entity.Product;
 import eCommerse.entity.ProductImage;
-import eCommerse.request.GetProductsReqDTO;
 import eCommerse.service.ProductsDisplayService;
 
 @RestController
@@ -89,12 +89,12 @@ public class ProductDisplayController {
 	@GetMapping("/products/{id}")
 	public ResponseEntity<Product> getProductById(@PathVariable Long id) {
 
-	    logger.info("ProductDisplayController : getProductById :: Started");
+		logger.info("ProductDisplayController : getProductById :: Started");
 
-	    Product product = productsDisplayService.getProductById(id);
+		Product product = productsDisplayService.getProductById(id);
 
-	    logger.info("ProductDisplayController : getProductById :: Ended");
+		logger.info("ProductDisplayController : getProductById :: Ended");
 
-	    return ResponseEntity.ok(product);
+		return ResponseEntity.ok(product);
 	}
 }

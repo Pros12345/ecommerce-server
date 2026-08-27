@@ -18,6 +18,7 @@ import eCommerse.entity.Address;
 import eCommerse.entity.Order;
 import eCommerse.entity.OrderItem;
 import eCommerse.entity.Product;
+import eCommerse.entity.ProductImage;
 import eCommerse.entity.User;
 import eCommerse.repository.AddressRepository;
 import eCommerse.repository.OrderRepository;
@@ -275,12 +276,16 @@ public class OrderServiceImpl implements OrderService {
 			itemResponse.setTotal(itemTotal);
 
 			// ==========================================
-			// FIRST PRODUCT IMAGE
+			// PRIMARY PRODUCT IMAGE
 			// ==========================================
 
 			if (product.getImages() != null && !product.getImages().isEmpty()) {
 
-				itemResponse.setImageId(product.getImages().get(0).getId());
+				ProductImage primaryImage = product.getImages().stream().filter(ProductImage::isPrimaryImage)
+						.findFirst().orElse(product.getImages().get(0));
+
+				itemResponse.setImageId(primaryImage.getId());
+
 			}
 
 			items.add(itemResponse);

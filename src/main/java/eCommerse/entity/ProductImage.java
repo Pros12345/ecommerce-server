@@ -26,14 +26,44 @@ public class ProductImage {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	// ==========================================
+	// FILE NAME
+	// ==========================================
+
 	private String fileName;
 
+	// ==========================================
+	// CONTENT TYPE
+	// ==========================================
+
 	private String contentType;
+
+	// ==========================================
+	// IMAGE DATA
+	// ==========================================
 
 	@Lob
 	@Basic(fetch = FetchType.LAZY)
 	@Column(columnDefinition = "LONGBLOB")
 	private byte[] imageData;
+
+	// ==========================================
+	// PRIMARY IMAGE
+	// ==========================================
+	//
+	// true = primary image
+	// false = normal image
+	//
+	// Only ONE image of a product should have
+	// this value as true.
+	// ==========================================
+
+	@Column(name = "is_primary", nullable = false)
+	private boolean primaryImage = false;
+
+	// ==========================================
+	// PRODUCT
+	// ==========================================
 
 	@ManyToOne
 	@JoinColumn(name = "product_id")
