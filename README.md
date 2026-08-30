@@ -586,6 +586,8 @@ Java Backend / Full Stack Developer
 
 This backend serves the Angular frontend.
 
+See the frontend README for UI features, screenshots, Angular architecture, local setup, and frontend deployment details.
+
 ## Demo Sreenshot
 
 <img width="341" height="623" alt="01-register" src="https://github.com/user-attachments/assets/7eb01291-1678-4757-8f02-785ca4642e88" />
