@@ -1,5 +1,7 @@
 package eCommerse.security;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -7,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import eCommerse.dto.LoginRequest;
+import eCommerse.dto.LoginResponse;
 import eCommerse.entity.User;
 import eCommerse.repository.UserRepository;
 
@@ -14,30 +18,83 @@ import eCommerse.repository.UserRepository;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-	
+	private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 
 	public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtUtil = jwtUtil;
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestBody User loginData) {
-		return userRepository.findByEmail(loginData.getEmail()).map(user -> {
-			System.out.println("Login attempt: " + loginData.getEmail());
-			System.out.println("Raw password: " + loginData.getPassword());
-			System.out.println("Stored password: " + user.getPassword());
-			if (passwordEncoder.matches("Prosenjit44@",
-					"$2a$10$5xONl7ri27XV2aOpt867JOar5oF/JbxvHN9GsweaXZ4XU/0hRdYHe")) {
-				String token = jwtUtil.generateToken(user.getEmail());
-				return ResponseEntity.ok(token);
-			} else {
-				return ResponseEntity.status(401).body("Invalid credentials");
+	public ResponseEntity<?> login(@RequestBody LoginRequest loginData) {
+
+		logger.info("AuthController : login :: Started");
+
+		String identifier = loginData.getIdentifier();
+		String password = loginData.getPassword();
+
+		if (identifier == null || identifier.isBlank()) {
+
+			return ResponseEntity.badRequest().body("Email or mobile number is required");
+		}
+
+		if (password == null || password.isBlank()) {
+
+			return ResponseEntity.badRequest().body("Password is required");
+		}
+
+		identifier = identifier.trim();
+
+		User user;
+
+		if (identifier.contains("@")) {
+
+			logger.info("Login attempt using email: {}", identifier);
+
+			user = userRepository.findByEmail(identifier).orElse(null);
+
+		}
+
+		else {
+
+			String mobileNumber = identifier;
+
+			if (mobileNumber.startsWith("+91")) {
+
+				mobileNumber = mobileNumber.substring(3);
 			}
-		}).orElse(ResponseEntity.status(404).body("User not found"));
+
+			logger.info("Login attempt using mobile: {}", mobileNumber);
+
+			user = userRepository.findByMobileNumber(mobileNumber).orElse(null);
+		}
+
+		if (user == null) {
+
+			logger.warn("User not found: {}", identifier);
+
+			return ResponseEntity.status(401).body("Invalid email/mobile number or password");
+		}
+
+		if (!passwordEncoder.matches(password, user.getPassword())) {
+
+			logger.warn("Invalid password for: {}", identifier);
+
+			return ResponseEntity.status(401).body("Invalid email/mobile number or password");
+		}
+
+		String token = jwtUtil.generateToken(user.getEmail());
+
+		logger.info("Login successful for user: {}", user.getEmail());
+
+		logger.info("AuthController : login :: Ended");
+
+		return ResponseEntity.ok(new LoginResponse(token, user.getEmail(), user.getFirstName()));
 	}
 }

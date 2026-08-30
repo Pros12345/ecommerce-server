@@ -2,11 +2,18 @@ package eCommerse.repository;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import eCommerse.dto.GetProductsReqDTO;
 import eCommerse.entity.Product;
-import eCommerse.request.GetProductsReqDTO;
 
 public interface ProductsRepository {
 
-	public Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile[] getProductsimages);
+	Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile[] getProductsimages);
 
+	void permanentlyDeleteProduct(Long productId);
+
+	int reduceStock(Long productId, Integer quantity);
+
+	int increaseStock(Long productId, Integer quantity);
+
+	Product findById(Long productId);
 }

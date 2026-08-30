@@ -3,8 +3,6 @@ package eCommerse.entity;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,21 +33,33 @@ public class Product {
 
 	private String name;
 
+	@Column(name = "description", length = 1000)
 	private String description;
 
 	private Integer quantity;
 
-	@Column(name = "image_original_name")
-	private String imageOriginalName;
-
-	@Column(name = "image_unique_name")
-	private String imageUniqueName;
-
 	@Column(name = "price")
 	private double price;
 
-	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-	@JsonManagedReference
+	@Column(name = "status", nullable = false)
+	private String status = "Active";
+
+	// ==========================================
+	// PRODUCT IMAGES
+	// ==========================================
+	//
+	// Primary image will always come first.
+	//
+	// primaryImage DESC:
+	// true → first
+	// false → after
+	//
+	// id ASC:
+	// maintains a stable order for the
+	// remaining images.
+	// ==========================================
+
+	@OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<ProductImage> images = new ArrayList<>();
 
 }

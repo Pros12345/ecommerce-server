@@ -2,10 +2,12 @@ package eCommerse.service;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import eCommerse.dto.GetProductsReqDTO;
 import eCommerse.entity.Product;
-import eCommerse.request.GetProductsReqDTO;
 
 public interface ProductsService {
 
-	public Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile[] getProductsimages);
+	Product saveProduct(GetProductsReqDTO getProductsReqDTO, MultipartFile[] getProductsimages);
+
+	void permanentlyDeleteProduct(Long productId);
 }

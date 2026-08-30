@@ -2,32 +2,55 @@ package eCommerse.controller;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import eCommerse.request.GetProductsReqDTO;
+import eCommerse.dto.GetProductsReqDTO;
 import eCommerse.service.ProductsService;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/products")
 public class ProductController {
 
-	@Autowired
-	ProductsService productsService;
+	private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
 
-	@PostMapping(value = "/products", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	final ProductsService productsService;
+
+	ProductController(ProductsService productsService) {
+		this.productsService = productsService;
+	}
+
+	@PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<String> addProduct(@RequestPart("product") GetProductsReqDTO getProductsReqDTO,
 			@RequestPart("images") MultipartFile[] getProductsimages) throws IOException {
 
+		logger.info("ProductController : addProduct :: Started");
+
 		productsService.saveProduct(getProductsReqDTO, getProductsimages);
+
+		logger.info("ProductController : addProduct :: Ended");
 
 		return ResponseEntity.ok("Product saved successfully");
 	}
 
+	@DeleteMapping("/permanent/{id}")
+	public ResponseEntity<?> permanentlyDeleteProduct(@PathVariable Long id) {
+
+		logger.info("ProductController : permanentlyDeleteProduct :: Started");
+
+		productsService.permanentlyDeleteProduct(id);
+
+		logger.info("ProductController : permanentlyDeleteProduct :: Ended");
+
+		return ResponseEntity.ok("Product permanently deleted successfully");
+	}
 }

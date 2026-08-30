@@ -1,8 +1,7 @@
 package eCommerse.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import java.math.BigDecimal;
 
-import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,64 +9,48 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+@Entity
 @Getter
 @Setter
-@Entity
-@Table(name = "product_image")
-public class ProductImage {
+@Table(name = "order_items")
+public class OrderItem {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	// ==========================================
-	// FILE NAME
+	// ORDER
 	// ==========================================
 
-	private String fileName;
-
-	// ==========================================
-	// CONTENT TYPE
-	// ==========================================
-
-	private String contentType;
-
-	// ==========================================
-	// IMAGE DATA
-	// ==========================================
-
-	@Lob
-	@Basic(fetch = FetchType.LAZY)
-	@Column(columnDefinition = "LONGBLOB")
-	private byte[] imageData;
-
-	// ==========================================
-	// PRIMARY IMAGE
-	// ==========================================
-	//
-	// true = primary image
-	// false = normal image
-	//
-	// Only ONE image of a product should have
-	// this value as true.
-	// ==========================================
-
-	@Column(name = "is_primary", nullable = false)
-	private boolean primaryImage = false;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "order_id", nullable = false)
+	private Order order;
 
 	// ==========================================
 	// PRODUCT
 	// ==========================================
 
-	@ManyToOne
-	@JoinColumn(name = "product_id")
-	@JsonBackReference
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "product_id", nullable = false)
 	private Product product;
 
+	// ==========================================
+	// QUANTITY
+	// ==========================================
+
+	@Column(nullable = false)
+	private Integer quantity;
+
+	// ==========================================
+	// PRICE AT ORDER TIME
+	// ==========================================
+
+	@Column(nullable = false)
+	private BigDecimal price;
 }
