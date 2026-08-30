@@ -22,18 +22,8 @@ public class ProductsRepositoryImpl implements ProductsRepository {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	// ==========================================
-	// SAVE PRODUCT
-	// ==========================================
-
 	@Override
-	public Product saveProduct(
-
-			GetProductsReqDTO dto,
-
-			MultipartFile[] images
-
-	) {
+	public Product saveProduct(GetProductsReqDTO dto, MultipartFile[] images) {
 
 		logger.info("ProductsRepositoryImpl : saveProduct :: Started");
 
@@ -41,83 +31,39 @@ public class ProductsRepositoryImpl implements ProductsRepository {
 
 		try {
 
-			// ----------------------------------
-			// PRODUCT DETAILS
-			// ----------------------------------
-
 			product.setName(dto.getName());
-
 			product.setDescription(dto.getDescription());
-
 			product.setQuantity(dto.getQuantity());
-
 			product.setPrice(dto.getPrice());
-
 			product.setStatus("Active");
-
-			// ----------------------------------
-			// PRIMARY IMAGE INDEX
-			// ----------------------------------
-
 			Integer primaryIndex = dto.getPrimaryImageIndex();
 
-			/*
-			 * If admin doesn't select anything, first image becomes primary.
-			 */
-
 			if (primaryIndex == null || primaryIndex < 0 || images == null || primaryIndex >= images.length) {
-
 				primaryIndex = 0;
-
 			}
 
-			// ----------------------------------
-			// SAVE IMAGES
-			// ----------------------------------
-
 			if (images != null && images.length > 0) {
-
 				for (int i = 0; i < images.length; i++) {
-
 					MultipartFile file = images[i];
-
 					if (file == null || file.isEmpty()) {
-
 						continue;
-
 					}
 
 					ProductImage productImage = new ProductImage();
-
 					productImage.setFileName(file.getOriginalFilename());
-
 					productImage.setContentType(file.getContentType());
-
 					productImage.setImageData(file.getBytes());
-
 					productImage.setProduct(product);
-
-					// ----------------------------------
-					// SET PRIMARY
-					// ----------------------------------
-
 					productImage.setPrimaryImage(i == primaryIndex);
-
 					product.getImages().add(productImage);
-
 				}
-
 			}
 
-			// ----------------------------------
-			// SAVE PRODUCT
-			// ----------------------------------
-
 			entityManager.persist(product);
-
 			entityManager.flush();
 
 			logger.info("Product saved successfully. ID: {}", product.getId());
+			logger.info("ProductsRepositoryImpl : saveProduct :: Ended");
 
 			return product;
 
@@ -126,22 +72,14 @@ public class ProductsRepositoryImpl implements ProductsRepository {
 		catch (Exception ex) {
 
 			logger.error("ProductsRepositoryImpl : saveProduct :: Error", ex);
-
 			throw new RuntimeException("Unable to save product", ex);
-
 		}
-
 	}
-
-	// ==========================================
-	// PERMANENT DELETE
-	// ==========================================
 
 	@Override
 	public void permanentlyDeleteProduct(Long productId) {
 
 		logger.info("ProductsRepositoryImpl : permanentlyDeleteProduct :: Started");
-
 		Product product = entityManager.find(Product.class, productId);
 
 		if (product == null) {
@@ -151,25 +89,17 @@ public class ProductsRepositoryImpl implements ProductsRepository {
 		}
 
 		entityManager.remove(product);
-
 		entityManager.flush();
 
 		logger.info("Product permanently deleted. ID: {}", productId);
+		logger.info("ProductsRepositoryImpl : permanentlyDeleteProduct :: Ended");
 
 	}
 
-	// ==========================================
-	// REDUCE STOCK
-	// ==========================================
-
 	@Override
-	public int reduceStock(
+	public int reduceStock(Long productId, Integer quantity) {
 
-			Long productId,
-
-			Integer quantity
-
-	) {
+		logger.info("ProductsRepositoryImpl : reduceStock :: Started");
 
 		String jpql = """
 				UPDATE Product p
@@ -179,17 +109,17 @@ public class ProductsRepositoryImpl implements ProductsRepository {
 				AND p.quantity >= :quantity
 				""";
 
+		logger.info("ProductsRepositoryImpl : reduceStock :: Ended");
+
 		return entityManager.createQuery(jpql).setParameter("quantity", quantity).setParameter("productId", productId)
 				.executeUpdate();
 
 	}
 
-	// ==========================================
-	// INCREASE STOCK
-	// ==========================================
-
 	@Override
 	public int increaseStock(Long productId, Integer quantity) {
+
+		logger.info("ProductsRepositoryImpl : increaseStock :: Started");
 
 		String jpql = """
 				UPDATE Product p
@@ -197,16 +127,16 @@ public class ProductsRepositoryImpl implements ProductsRepository {
 				WHERE p.id = :productId
 				""";
 
+		logger.info("ProductsRepositoryImpl : increaseStock :: Ended");
+
 		return entityManager.createQuery(jpql).setParameter("quantity", quantity).setParameter("productId", productId)
 				.executeUpdate();
 	}
 
-	// ==========================================
-	// FIND PRODUCT
-	// ==========================================
-
 	@Override
 	public Product findById(Long productId) {
+
+		logger.info("ProductsRepositoryImpl : findById :: Started");
 
 		return entityManager.find(Product.class, productId);
 

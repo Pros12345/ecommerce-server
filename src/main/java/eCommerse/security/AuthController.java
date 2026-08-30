@@ -37,20 +37,13 @@ public class AuthController {
 		logger.info("AuthController : login :: Started");
 
 		String identifier = loginData.getIdentifier();
-
 		String password = loginData.getPassword();
 
-		/*
-		 * Validate identifier
-		 */
 		if (identifier == null || identifier.isBlank()) {
 
 			return ResponseEntity.badRequest().body("Email or mobile number is required");
 		}
 
-		/*
-		 * Validate password
-		 */
 		if (password == null || password.isBlank()) {
 
 			return ResponseEntity.badRequest().body("Password is required");
@@ -60,9 +53,6 @@ public class AuthController {
 
 		User user;
 
-		/*
-		 * Login using email
-		 */
 		if (identifier.contains("@")) {
 
 			logger.info("Login attempt using email: {}", identifier);
@@ -71,9 +61,6 @@ public class AuthController {
 
 		}
 
-		/*
-		 * Login using mobile number
-		 */
 		else {
 
 			String mobileNumber = identifier;
@@ -88,9 +75,6 @@ public class AuthController {
 			user = userRepository.findByMobileNumber(mobileNumber).orElse(null);
 		}
 
-		/*
-		 * User not found
-		 */
 		if (user == null) {
 
 			logger.warn("User not found: {}", identifier);
@@ -98,9 +82,6 @@ public class AuthController {
 			return ResponseEntity.status(401).body("Invalid email/mobile number or password");
 		}
 
-		/*
-		 * Validate password
-		 */
 		if (!passwordEncoder.matches(password, user.getPassword())) {
 
 			logger.warn("Invalid password for: {}", identifier);
@@ -108,15 +89,11 @@ public class AuthController {
 			return ResponseEntity.status(401).body("Invalid email/mobile number or password");
 		}
 
-		/*
-		 * Generate JWT using user's email.
-		 *
-		 * This is important because your AddressService uses Authentication.getName()
-		 * to find the user.
-		 */
 		String token = jwtUtil.generateToken(user.getEmail());
 
 		logger.info("Login successful for user: {}", user.getEmail());
+
+		logger.info("AuthController : login :: Ended");
 
 		return ResponseEntity.ok(new LoginResponse(token, user.getEmail(), user.getFirstName()));
 	}

@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,268 +32,145 @@ import eCommerse.service.OrderService;
 @Transactional
 public class OrderServiceImpl implements OrderService {
 
+	private static final Logger logger = LoggerFactory.getLogger(AdminUserServiceImpl.class);
 	private final OrderRepository orderRepository;
-
 	private final ProductsRepository productsRepository;
-
 	private final AddressRepository addressRepository;
-
 	private final UserRepository userRepository;
 
 	public OrderServiceImpl(OrderRepository orderRepository, ProductsRepository productsRepository,
 			AddressRepository addressRepository, UserRepository userRepository) {
 
 		this.orderRepository = orderRepository;
-
 		this.productsRepository = productsRepository;
-
 		this.addressRepository = addressRepository;
-
 		this.userRepository = userRepository;
 	}
-
-	// ==========================================
-	// PLACE ORDER
-	// ==========================================
 
 	@Override
 	public OrderResponse placeOrder(OrderRequest request) {
 
-		// --------------------------------------
-		// GET LOGGED IN USER
-		// --------------------------------------
+		logger.info("OrderServiceImpl : placeOrder :: Started");
 
 		User user = getLoggedInUser();
-
-		// --------------------------------------
-		// ONLY COD ALLOWED
-		// --------------------------------------
-
 		if (!"COD".equalsIgnoreCase(request.getPaymentMethod())) {
-
 			throw new RuntimeException("Only Cash on Delivery is allowed");
 		}
-
-		// --------------------------------------
-		// GET USER ADDRESS
-		// --------------------------------------
 
 		Address address = addressRepository.findByIdAndUser(request.getAddressId(), user)
 				.orElseThrow(() -> new RuntimeException("Address not found"));
 
-		// --------------------------------------
-		// CREATE ORDER
-		// --------------------------------------
-
 		Order order = new Order();
-
 		order.setUser(user);
-
 		order.setAddress(address);
-
 		order.setPaymentMethod("COD");
-
 		order.setOrderStatus("PLACED");
-
 		order.setOrderDate(LocalDateTime.now());
-
 		BigDecimal totalAmount = BigDecimal.ZERO;
-
 		List<OrderItem> orderItems = new ArrayList<>();
 
-		// --------------------------------------
-		// PROCESS CART ITEMS
-		// --------------------------------------
-
 		for (OrderItemRequest itemRequest : request.getItems()) {
-
 			if (itemRequest.getQuantity() <= 0) {
-
 				throw new RuntimeException("Invalid quantity");
 			}
-
 			Product product = getProduct(itemRequest.getProductId());
-
-			// ----------------------------------
-			// REDUCE STOCK
-			// ----------------------------------
-
 			int updatedRows = productsRepository.reduceStock(product.getId(), itemRequest.getQuantity());
-
 			if (updatedRows == 0) {
-
 				throw new RuntimeException("Insufficient stock for product: " + product.getName());
 			}
 
-			// ----------------------------------
-			// CREATE ORDER ITEM
-			// ----------------------------------
-
 			OrderItem orderItem = new OrderItem();
-
 			orderItem.setOrder(order);
-
 			orderItem.setProduct(product);
-
 			orderItem.setQuantity(itemRequest.getQuantity());
-
 			orderItem.setPrice(BigDecimal.valueOf(product.getPrice()));
-
 			orderItems.add(orderItem);
-
-			// ----------------------------------
-			// CALCULATE TOTAL
-			// ----------------------------------
-
 			BigDecimal itemTotal = BigDecimal.valueOf(product.getPrice())
 					.multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
-
 			totalAmount = totalAmount.add(itemTotal);
 		}
 
-		// --------------------------------------
-		// SET ORDER ITEMS
-		// --------------------------------------
-
 		order.setOrderItems(orderItems);
-
 		order.setTotalAmount(totalAmount);
-
-		// --------------------------------------
-		// SAVE ORDER
-		// --------------------------------------
-
 		Order savedOrder = orderRepository.saveOrder(order);
 
-		// --------------------------------------
-		// RESPONSE
-		// --------------------------------------
+		logger.info("OrderServiceImpl : placeOrder :: Ended");
 
 		return convertToResponse(savedOrder, address);
 	}
 
-	// ==========================================
-	// GET USER
-	// ==========================================
-
 	private User getLoggedInUser() {
 
+		logger.info("OrderServiceImpl : getLoggedInUser :: Started");
+
 		String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+		logger.info("OrderServiceImpl : getLoggedInUser :: Ended");
 
 		return userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 	}
 
-	// ==========================================
-	// GET PRODUCT
-	// ==========================================
-
 	private Product getProduct(Long productId) {
+
+		logger.info("OrderServiceImpl : getProduct :: Started");
 
 		Product product = productsRepository.findById(productId);
 
 		if (product == null) {
-
 			throw new RuntimeException("Product not found with id: " + productId);
 		}
+
+		logger.info("OrderServiceImpl : getProduct :: Ended");
 
 		return product;
 	}
 
-	// ==========================================
-	// CONVERT RESPONSE
-	// ==========================================
-
 	private OrderResponse convertToResponse(Order order, Address address) {
 
+		logger.info("OrderServiceImpl : convertToResponse :: Started");
+
 		OrderResponse response = new OrderResponse();
-
 		response.setOrderId(order.getId());
-
 		response.setTotalAmount(order.getTotalAmount());
-
 		response.setPaymentMethod(order.getPaymentMethod());
-
 		response.setOrderStatus(order.getOrderStatus());
-
 		response.setOrderDate(order.getOrderDate());
 
-		// --------------------------------------
-		// ADDRESS RESPONSE
-		// --------------------------------------
-
 		AddressResponse addressResponse = new AddressResponse();
-
 		addressResponse.setId(address.getId());
-
 		addressResponse.setFullName(address.getFullName());
-
 		addressResponse.setMobileNumber(address.getMobileNumber());
-
 		addressResponse.setAddressLine1(address.getAddressLine1());
-
 		addressResponse.setAddressLine2(address.getAddressLine2());
-
 		addressResponse.setCity(address.getCity());
-
 		addressResponse.setState(address.getState());
-
 		addressResponse.setPincode(address.getPincode());
-
 		addressResponse.setLandmark(address.getLandmark());
-
 		addressResponse.setAddressType(address.getAddressType());
-
 		response.setAddress(addressResponse);
 
-		// --------------------------------------
-		// ORDER ITEMS RESPONSE
-		// --------------------------------------
-
 		List<OrderItemResponse> items = new ArrayList<>();
-
 		for (OrderItem orderItem : order.getOrderItems()) {
-
 			OrderItemResponse itemResponse = new OrderItemResponse();
-
 			Product product = orderItem.getProduct();
 
-			// ==========================================
-			// PRODUCT DETAILS
-			// ==========================================
-
 			itemResponse.setProductId(product.getId());
-
 			itemResponse.setProductName(product.getName());
-
 			itemResponse.setQuantity(orderItem.getQuantity());
-
 			itemResponse.setPrice(orderItem.getPrice());
-
-			// ==========================================
-			// ITEM TOTAL
-			// ==========================================
-
 			BigDecimal itemTotal = orderItem.getPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity()));
-
 			itemResponse.setTotal(itemTotal);
 
-			// ==========================================
-			// PRIMARY PRODUCT IMAGE
-			// ==========================================
-
 			if (product.getImages() != null && !product.getImages().isEmpty()) {
-
 				ProductImage primaryImage = product.getImages().stream().filter(ProductImage::isPrimaryImage)
 						.findFirst().orElse(product.getImages().get(0));
-
 				itemResponse.setImageId(primaryImage.getId());
-
 			}
-
 			items.add(itemResponse);
 		}
-
 		response.setItems(items);
+
+		logger.info("OrderServiceImpl : convertToResponse :: Ended");
 
 		return response;
 	}
@@ -299,16 +178,16 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public List<OrderResponse> getMyOrders() {
 
+		logger.info("OrderServiceImpl : getMyOrders :: Started");
+
 		User user = getLoggedInUser();
-
 		List<Order> orders = orderRepository.findOrdersByUser(user);
-
 		List<OrderResponse> responses = new ArrayList<>();
-
 		for (Order order : orders) {
-
 			responses.add(convertToResponse(order, order.getAddress()));
 		}
+
+		logger.info("OrderServiceImpl : getMyOrders :: Ended");
 
 		return responses;
 	}
@@ -316,65 +195,41 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public OrderResponse cancelOrder(Long orderId) {
 
+		logger.info("OrderServiceImpl : cancelOrder :: Started");
+
 		User user = getLoggedInUser();
-
-		// --------------------------------------
-		// FIND ORDER
-		// --------------------------------------
-
 		Order order = orderRepository.findOrderByIdAndUser(orderId, user);
-
 		if (order == null) {
-
 			throw new RuntimeException("Order not found");
 		}
 
-		// --------------------------------------
-		// CHECK ALREADY CANCELLED
-		// --------------------------------------
-
 		if ("CANCELLED".equalsIgnoreCase(order.getOrderStatus())) {
-
 			throw new RuntimeException("Order is already cancelled");
 		}
 
-		// --------------------------------------
-		// RESTORE PRODUCT STOCK
-		// --------------------------------------
-
 		for (OrderItem orderItem : order.getOrderItems()) {
-
 			Product product = orderItem.getProduct();
 
 			if (product == null) {
-
 				throw new RuntimeException("Product not found for order item");
 			}
 
 			int quantity = orderItem.getQuantity();
 
 			if (quantity <= 0) {
-
 				throw new RuntimeException("Invalid order item quantity");
 			}
 
 			int updatedRows = productsRepository.increaseStock(product.getId(), quantity);
 
 			if (updatedRows == 0) {
-
 				throw new RuntimeException("Unable to restore stock for product: " + product.getName());
 			}
 		}
 
-		// --------------------------------------
-		// UPDATE ORDER STATUS
-		// --------------------------------------
-
 		order.setOrderStatus("CANCELLED");
 
-		// --------------------------------------
-		// RETURN RESPONSE
-		// --------------------------------------
+		logger.info("OrderServiceImpl : cancelOrder :: Ended");
 
 		return convertToResponse(order, order.getAddress());
 	}
@@ -382,20 +237,22 @@ public class OrderServiceImpl implements OrderService {
 	@Override
 	public void deleteCancelledOrder(Long orderId) {
 
-		User user = getLoggedInUser();
+		logger.info("OrderServiceImpl : deleteCancelledOrder :: Started");
 
+		User user = getLoggedInUser();
 		Order order = orderRepository.findOrderByIdAndUser(orderId, user);
 
 		if (order == null) {
-
 			throw new RuntimeException("Order not found");
 		}
 
 		if (!"CANCELLED".equalsIgnoreCase(order.getOrderStatus())) {
-
 			throw new RuntimeException("Only cancelled orders can be deleted");
 		}
 
 		orderRepository.deleteOrder(order);
+
+		logger.info("OrderServiceImpl : deleteCancelledOrder :: Ended");
+
 	}
 }

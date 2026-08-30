@@ -31,7 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
 
-		logger.info("JWT FILTER STARTED");
+		logger.info("JwtAuthenticationFilter :: JwtAuthenticationFilter :: Started");
 
 		String requestUri = request.getRequestURI();
 
@@ -39,14 +39,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		String authHeader = request.getHeader("Authorization");
 
-		/*
-		 * IMPORTANT: Never log the actual JWT token.
-		 */
 		logger.info("Authorization Header present: {}", authHeader != null);
 
-		/*
-		 * No Authorization header
-		 */
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 
 			logger.info("No Bearer token found");
@@ -94,16 +88,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			return;
 		}
 
-		/*
-		 * Diagnostic logging.
-		 *
-		 * This will help us verify that authentication exists before the remaining
-		 * Spring Security filters execute.
-		 */
 		logger.info("Before filter chain - Method: {}, URI: {}, Origin: {}, Authenticated: {}", request.getMethod(),
 				request.getRequestURI(), request.getHeader("Origin"),
 				SecurityContextHolder.getContext().getAuthentication() != null);
 
 		filterChain.doFilter(request, response);
+
+		logger.info("JwtAuthenticationFilter :: JwtAuthenticationFilter :: Ended");
+
 	}
 }

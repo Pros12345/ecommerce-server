@@ -16,19 +16,10 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtUtil {
 
-	/*
-	 * IMPORTANT:
-	 *
-	 * For production, this should eventually come from a Railway environment
-	 * variable instead of being hard-coded.
-	 */
 	private final String SECRET_KEY = "mySuperSecretKeyThatIsAtLeast32CharsLong!";
 
 	private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
 
-	/*
-	 * JWT validity: 10 hours
-	 */
 	private static final long EXPIRATION_TIME = 1000L * 60 * 60 * 10;
 
 	private Key getSigningKey() {
@@ -43,8 +34,9 @@ public class JwtUtil {
 		logger.info("JwtUtil : generateToken :: Started");
 
 		Date issuedAt = new Date();
-
 		Date expiration = new Date(issuedAt.getTime() + EXPIRATION_TIME);
+
+		logger.info("JwtUtil : generateToken :: Ended");
 
 		return Jwts.builder().setSubject(username).setIssuedAt(issuedAt).setExpiration(expiration)
 				.signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();

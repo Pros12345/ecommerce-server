@@ -2,6 +2,8 @@ package eCommerse.controller;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +26,8 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/user")
 public class UserProfileController {
 
+	private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
 	private final UserRepository userRepository;
 
 	private final PasswordEncoder passwordEncoder;
@@ -38,6 +42,8 @@ public class UserProfileController {
 	@GetMapping("/profile")
 	public ResponseEntity<?> getProfile(Authentication authentication) {
 
+		logger.info("UserProfileController : getProfile :: Started");
+
 		String email = authentication.getName();
 
 		User user = userRepository.findByEmail(email).orElse(null);
@@ -50,12 +56,16 @@ public class UserProfileController {
 		UserProfileResponse response = new UserProfileResponse(user.getId(), user.getFirstName(), user.getEmail(),
 				user.getCountryCode(), user.getMobileNumber());
 
+		logger.info("UserProfileController : getProfile :: Ended");
+
 		return ResponseEntity.ok(response);
 	}
 
 	@PutMapping("/profile")
 	public ResponseEntity<?> updateProfile(Authentication authentication,
 			@Valid @RequestBody UpdateProfileRequest request) {
+
+		logger.info("UserProfileController : updateProfile :: Started");
 
 		String currentEmail = authentication.getName();
 
@@ -96,12 +106,16 @@ public class UserProfileController {
 		UserProfileResponse response = new UserProfileResponse(user.getId(), user.getFirstName(), user.getEmail(),
 				user.getCountryCode(), user.getMobileNumber());
 
+		logger.info("UserProfileController : updateProfile :: Ended");
+
 		return ResponseEntity.ok(response);
 	}
 
 	@PutMapping("/change-password")
 	public ResponseEntity<?> changePassword(Authentication authentication,
 			@Valid @RequestBody ChangePasswordRequest request) {
+
+		logger.info("UserProfileController : changePassword :: Started");
 
 		String email = authentication.getName();
 
@@ -133,12 +147,16 @@ public class UserProfileController {
 
 		userRepository.save(user);
 
+		logger.info("UserProfileController : changePassword :: Ended");
+
 		return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
 	}
 
 	@DeleteMapping("/profile")
 	public ResponseEntity<?> deleteAccount(Authentication authentication,
 			@Valid @RequestBody DeleteAccountRequest request) {
+
+		logger.info("UserProfileController : deleteAccount :: Started");
 
 		String currentEmail = authentication.getName();
 
@@ -157,6 +175,8 @@ public class UserProfileController {
 		}
 
 		userRepository.delete(user);
+
+		logger.info("UserProfileController : deleteAccount :: Ended");
 
 		return ResponseEntity.ok(Map.of("message", "Account deleted successfully"));
 	}

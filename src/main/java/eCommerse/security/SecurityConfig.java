@@ -47,7 +47,9 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+		logger.info("SecurityConfig : securityFilterChain :: Started");
 
 		http.csrf(csrf -> csrf.disable())
 
@@ -67,11 +69,15 @@ public class SecurityConfig {
 
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
+		logger.info("SecurityConfig : securityFilterChain :: Ended");
+
 		return http.build();
 	}
 
 	@Bean
-	public CorsConfigurationSource corsConfigurationSource() {
+	CorsConfigurationSource corsConfigurationSource() {
+
+		logger.info("SecurityConfig : corsConfigurationSource :: Started");
 
 		CorsConfiguration configuration = new CorsConfiguration();
 
@@ -87,6 +93,8 @@ public class SecurityConfig {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
 		source.registerCorsConfiguration("/**", configuration);
+
+		logger.info("SecurityConfig : corsConfigurationSource :: Ended");
 
 		return source;
 	}
