@@ -587,7 +587,13 @@ Java Backend / Full Stack Developer
 This backend serves the Angular frontend.
 
 ## Demo Sreenshot
-<img width="341" height="623" alt="01-register" src="https://github.com/user-attachments/assets/c8264b6e-67d1-40ff-ad96-da2dd7c92887" />
+
+<img width="341" height="623" alt="01-register" src="https://github.com/user-attachments/assets/7eb01291-1678-4757-8f02-785ca4642e88" />
+<img width="307" height="445" alt="02-login" src="https://github.com/user-attachments/assets/addb4b10-1b4e-4179-b60c-1f2813151e0b" />
+<img width="577" height="520" alt="03-add-product" src="https://github.com/user-attachments/assets/8f32d80c-5659-4071-ba57-73bb86a57a2e" />
+<img width="1353" height="643" alt="04-cart" src="https://github.com/user-attachments/assets/cb8cf146-fc94-474e-a8eb-e2cea149efc6" />
+<img width="712" height="401" alt="05-saved-addresses" src="https://github.com/user-attachments/assets/5a4f06e1-4cab-4ec7-823c-0e21a3c894c4" />
+<img width="824" height="648" alt="06-orders" src="https://github.com/user-attachments/assets/cbbec02e-f44a-484e-a847-c5c8b5c1e69b" />
+<img width="358" height="612" alt="07-manage-account" src="https://github.com/user-attachments/assets/7916c92c-bbea-4c93-9497-3e2fdac7a76d" />
 
 
-See the frontend README for UI features, screenshots, Angular architecture, local setup, and frontend deployment details.
