@@ -44,7 +44,7 @@ public class ProductImage {
 
 	@Lob
 	@Basic(fetch = FetchType.LAZY)
-	@Column(columnDefinition = "LONGBLOB")
+	@Column(name = "image_data")
 	private byte[] imageData;
 
 	// ==========================================
